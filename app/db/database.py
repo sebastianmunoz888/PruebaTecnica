@@ -1,18 +1,16 @@
 from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, declarative_base
 from app.core.config import settings
 
-# Usar postgresql:// (psycopg2) en lugar de postgresql+psycopg://
-DATABASE_URL = "postgresql+psycopg://postgres:admin123@127.0.0.1:5432/technical_test"
+DATABASE_URL = (
+    f"postgresql+psycopg://{settings.DB_USER}:"
+    f"{settings.DB_PASSWORD}@{settings.DB_HOST}:"
+    f"{settings.DB_PORT}/{settings.DB_NAME}"
+)
 
-
-engine = create_engine(DATABASE_URL)
-
+engine = create_engine(DATABASE_URL, echo=False)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
 Base = declarative_base()
-
 
 def get_db():
     db = SessionLocal()

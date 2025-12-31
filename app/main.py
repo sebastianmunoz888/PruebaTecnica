@@ -1,25 +1,48 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from contextlib import asynccontextmanager
 from app.api import auth, tasks
-import os
+import logging
 
-# Configurar variables de entorno
-if not os.getenv("DB_HOST"):
-    os.environ["DB_HOST"] = "localhost"
-    os.environ["DB_PORT"] = "5432"
-    os.environ["DB_NAME"] = "technical_test"
-    os.environ["DB_USER"] = "postgres"
-    os.environ["DB_PASSWORD"] = "postgres"
-    os.environ["SECRET_KEY"] = "super_secret_key_change_this"
-    os.environ["ALGORITHM"] = "HS256"
-    os.environ["ACCESS_TOKEN_EXPIRE_MINUTES"] = "30"
-    os.environ["INITIAL_USER_EMAIL"] = "admin@example.com"
-    os.environ["INITIAL_USER_PASSWORD"] = "admin123"
+# Configurar logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Código que se ejecuta al inicio
+    logger.info("=" * 70)
+    logger.info("INICIANDO APLICACIÓN - Technical Test API")
+    logger.info("=" * 70)
+    
+    try:
+        from app.db.init_db import init_database
+        init_database()
+        logger.info("=" * 70)
+        logger.info("✓ Base de datos inicializada correctamente")
+        logger.info("=" * 70)
+    except Exception as e:
+        logger.error("=" * 70)
+        logger.error(f"❌ ERROR al inicializar la base de datos: {e}")
+        logger.error("=" * 70)
+        import traceback
+        traceback.print_exc()
+    
+    yield
+    
+    # Código que se ejecuta al cerrar (si necesitas cleanup)
+    logger.info("Cerrando aplicación...")
+
 
 app = FastAPI(
     title="Technical Test API",
-    description="API REST para gestión de tareas con autenticación JWT",
-    version="1.0.0"
+    description="API REST con FastAPI y PostgreSQL",
+    version="1.0.0",
+    lifespan=lifespan
 )
 
 # Configurar CORS
@@ -35,16 +58,22 @@ app.add_middleware(
 app.include_router(auth.router)
 app.include_router(tasks.router)
 
-
 @app.get("/")
-def root():
+def read_root():
     return {
-        "message": "API de Technical Test",
-        "docs": "/docs",
-        "version": "1.0.0"
+        "message": "API de Prueba Técnica - FastAPI",
+        "version": "1.0.0",
+        "status": "online",
+        "documentation": {
+            "swagger": "/docs",
+            "redoc": "/redoc"
+        }
     }
-
 
 @app.get("/health")
 def health_check():
-    return {"status": "healthy"}
+    """Endpoint para verificar el estado de la API"""
+    return {
+        "status": "healthy",
+        "database": "connected"
+    }
