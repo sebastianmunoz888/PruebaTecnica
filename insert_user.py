@@ -26,22 +26,18 @@ def insert_user_direct():
     salt = bcrypt.gensalt(rounds=12)
     hashed_password = bcrypt.hashpw(password.encode('utf-8'), salt).decode('utf-8')
     
-    print("\n" + "=" * 70)
-    print("Creando Usuario Inicial")
-    print("=" * 70 + "\n")
-    
     try:
         db = SessionLocal()
         
         # Verificar si el usuario ya existe
         existing = db.query(User).filter(User.email == email).first()
         if existing:
-            print(f"ℹ El usuario '{email}' ya existe")
+            print(f"User already exists: {email}")
             db.close()
             return True
         
         # Crear el usuario
-        print(f"Creando usuario: {email}")
+        
         new_user = User(
             email=email,
             hashed_password=hashed_password
@@ -51,22 +47,12 @@ def insert_user_direct():
         db.commit()
         db.close()
         
-        print("\n" + "=" * 70)
-        print("✓ Usuario creado exitosamente")
-        print("=" * 70)
-        print("\nCredenciales:")
-        print(f"  Email:    {email}")
-        print(f"  Password: {password}")
-        print("\nPuedes iniciar la aplicación con:")
-        print("  uvicorn app.main:app --reload")
-        print("=" * 70 + "\n")
+        print(f"User created: {email}")
         
         return True
         
     except Exception as e:
-        print(f"\n❌ Error: {e}")
-        import traceback
-        traceback.print_exc()
+        print(f"Error: {e}")
         return False
 
 

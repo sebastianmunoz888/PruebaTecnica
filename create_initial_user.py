@@ -18,28 +18,17 @@ from app.core.config import settings
 
 
 def main():
-    print("\n" + "=" * 70)
-    print("Script de Creación de Usuario Inicial")
-    print("Technical Test API - FastAPI")
-    print("=" * 70 + "\n")
-    
+    # Minimal, non-verbose output
     try:
         db = SessionLocal()
         
         # Verificar si el usuario ya existe
-        existing_user = db.query(User).filter(
-            User.email == settings.INITIAL_USER_EMAIL
-        ).first()
-        
+        existing_user = db.query(User).filter(User.email == settings.INITIAL_USER_EMAIL).first()
         if existing_user:
-            print(f"ℹ El usuario '{settings.INITIAL_USER_EMAIL}' ya existe")
-            print("\nCredenciales:")
-            print(f"  Email:    {settings.INITIAL_USER_EMAIL}")
-            print(f"  Password: {settings.INITIAL_USER_PASSWORD}")
+            print(f"User already exists: {settings.INITIAL_USER_EMAIL}")
             return True
         
         # Crear el usuario
-        print(f"Creando usuario: {settings.INITIAL_USER_EMAIL}")
         hashed_password = get_password_hash(settings.INITIAL_USER_PASSWORD)
         
         initial_user = User(
@@ -51,24 +40,12 @@ def main():
         db.commit()
         db.close()
         
-        print("\n" + "=" * 70)
-        print("✓ Usuario creado exitosamente")
-        print("=" * 70)
-        print("\nCredenciales:")
-        print(f"  Email:    {settings.INITIAL_USER_EMAIL}")
-        print(f"  Password: {settings.INITIAL_USER_PASSWORD}")
-        print("\nAhora puedes iniciar la aplicación con:")
-        print("  uvicorn app.main:app --reload")
-        print("\nY acceder a la documentación en:")
-        print("  http://127.0.0.1:8000/docs")
-        print("=" * 70 + "\n")
+        print("User created: {}".format(settings.INITIAL_USER_EMAIL))
         
         return True
         
     except Exception as e:
-        print(f"\n❌ Error al crear el usuario: {e}", file=sys.stderr)
-        import traceback
-        traceback.print_exc()
+        print(f"Error creating user: {e}", file=sys.stderr)
         return False
 
 

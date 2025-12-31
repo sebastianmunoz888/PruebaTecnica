@@ -9,5 +9,4 @@ password = "admin123"
 # Generar salt y hash
 salt = bcrypt.gensalt(rounds=12)
 hashed = bcrypt.hashpw(password.encode('utf-8'), salt)
-print(f"Contraseña: {password}")
-print(f"Hash: {hashed.decode('utf-8')}")
+print(hashed.decode('utf-8'))

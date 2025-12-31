@@ -1,48 +1,12 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from contextlib import asynccontextmanager
 from app.api import auth, tasks
-import logging
-
-# Configurar logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger(__name__)
-
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    # Código que se ejecuta al inicio
-    logger.info("=" * 70)
-    logger.info("INICIANDO APLICACIÓN - Technical Test API")
-    logger.info("=" * 70)
-    
-    try:
-        from app.db.init_db import init_database
-        init_database()
-        logger.info("=" * 70)
-        logger.info("✓ Base de datos inicializada correctamente")
-        logger.info("=" * 70)
-    except Exception as e:
-        logger.error("=" * 70)
-        logger.error(f"❌ ERROR al inicializar la base de datos: {e}")
-        logger.error("=" * 70)
-        import traceback
-        traceback.print_exc()
-    
-    yield
-    
-    # Código que se ejecuta al cerrar (si necesitas cleanup)
-    logger.info("Cerrando aplicación...")
 
 
 app = FastAPI(
     title="Technical Test API",
     description="API REST con FastAPI y PostgreSQL",
     version="1.0.0",
-    lifespan=lifespan
 )
 
 # Configurar CORS

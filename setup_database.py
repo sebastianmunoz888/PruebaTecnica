@@ -34,38 +34,20 @@ def create_enum_type():
                 END $$;
             """))
             conn.commit()
-        print("✓ Tipo ENUM 'taskstatus' creado (o ya existe)")
         return True
-    except Exception as e:
-        print(f"❌ Error al crear ENUM: {e}")
+    except Exception:
         return False
 
 
 def create_tables():
     """Crear las tablas usando SQLAlchemy"""
     try:
-        # Importar modelos para registrarlos en Base
         from app.models import user, task
-        
-        # Crear las tablas
         Base.metadata.create_all(bind=engine)
-        
-        # Verificar que se crearon
         inspector = inspect(engine)
         tables = inspector.get_table_names()
-        
-        if 'users' in tables and 'tasks' in tables:
-            print("✓ Tabla 'users' creada")
-            print("✓ Tabla 'tasks' creada")
-            return True
-        else:
-            print("❌ Las tablas no se crearon correctamente")
-            return False
-            
-    except Exception as e:
-        print(f"❌ Error al crear tablas: {e}")
-        import traceback
-        traceback.print_exc()
+        return 'users' in tables and 'tasks' in tables
+    except Exception:
         return False
 
 
@@ -81,56 +63,29 @@ def create_indexes():
                 "CREATE INDEX IF NOT EXISTS ix_tasks_status ON tasks(status)",
                 "CREATE INDEX IF NOT EXISTS ix_tasks_created_at ON tasks(created_at)",
             ]
-            
             for idx in indexes:
                 conn.execute(text(idx))
-            
             conn.commit()
-        print("✓ Índices creados")
         return True
-    except Exception as e:
-        print(f"❌ Error al crear índices: {e}")
+    except Exception:
         return False
 
 
 def main():
-    print("\n" + "=" * 70)
-    print("CONFIGURACIÓN DE BASE DE DATOS")
-    print("Technical Test API - FastAPI")
-    print("=" * 70 + "\n")
+    # Minimal output
     
-    print(f"Conectando a: {settings.DB_HOST}:{settings.DB_PORT}/{settings.DB_NAME}")
-    
+    print(f"Configuring DB {settings.DB_HOST}:{settings.DB_PORT}/{settings.DB_NAME}")
     try:
-        # Paso 1: Crear ENUM
-        print("\n[Paso 1] Creando tipo ENUM...")
         if not create_enum_type():
-            print("⚠ Continuando sin embargo...")
-        
-        # Paso 2: Crear tablas
-        print("\n[Paso 2] Creando tablas...")
+            pass
         if not create_tables():
-            raise Exception("No se pudieron crear las tablas")
-        
-        # Paso 3: Crear índices
-        print("\n[Paso 3] Creando índices...")
-        if not create_indexes():
-            print("⚠ No se pudieron crear todos los índices, pero continuamos")
-        
-        print("\n" + "=" * 70)
-        print("✓ Base de datos configurada correctamente")
-        print("=" * 70)
-        print("\nProximos pasos:")
-        print("  1. Crear usuario inicial: python create_initial_user.py")
-        print("  2. Iniciar la aplicación: uvicorn app.main:app --reload")
-        print("=" * 70 + "\n")
-        
+            raise Exception("Tables creation failed")
+        create_indexes()
+        print("Database configured")
         return True
         
     except Exception as e:
-        print(f"\n❌ Error: {e}")
-        import traceback
-        traceback.print_exc()
+        print(f"Error: {e}")
         return False
 
 
